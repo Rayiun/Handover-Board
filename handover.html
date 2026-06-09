@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Handover Board</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --text2: #6b6b65;
+  --text3: #9b9b93;
+  --blue: #1a56a0;
+  --blue-bg: #e8f0fa;
+  --blue-border: #aac4e8;
+  --green-bg: #e8f2e0; --green-text: #2a5c16; --green-border: #b0d490;
+  --amber-bg: #fdf0da; --amber-text: #7a4a08; --amber-border: #f5c870;
+  --red-bg: #fdeaea; --red-text: #8c1f1f; --red-border: #f0aaaa;
+  --purple-bg: #eeedf8; --purple-text: #3c3280; --purple-border: #c8c4f0;
+  --gray-bg: #f0ede8; --gray-text: #555550; --gray-border: #ccc9c0;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* ── NAV ── */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text);}
+.nav-logo span{color:var(--blue);}
+.nav-breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);}
+.nav-breadcrumb button{background:none;border:none;cursor:pointer;color:var(--blue);font-family:var(--font);font-size:13px;padding:0;}
+.nav-breadcrumb button:hover{text-decoration:underline;}
+.nav-breadcrumb .sep{color:var(--text3);}
+
+/* ── PAGES ── */
+.page{display:none;min-height:calc(100vh - 52px);}
+.page.active{display:block;}
+
+/* ── LANDING ── */
+#page-landing{display:none;align-items:center;justify-content:center;flex-direction:column;padding:60px 24px;}
+#page-landing.active{display:flex;}
+.landing-header{text-align:center;margin-bottom:48px;}
+.landing-header h1{font-size:28px;font-weight:600;letter-spacing:-0.03em;margin-bottom:8px;}
+.landing-header p{font-size:15px;color:var(--text2);}
+.hospital-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:480px;width:100%;}
+.hospital-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;text-align:center;}
+.hospital-card:hover{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,0.08);}
+.hospital-card.disabled{opacity:0.45;cursor:not-allowed;pointer-events:none;}
+.hospital-card .hc-name{font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-bottom:4px;}
+.hospital-card .hc-sub{font-size:12px;color:var(--text2);}
+.hospital-card .hc-badge{display:inline-block;margin-top:10px;padding:3px 10px;background:var(--blue-bg);color:var(--blue);border-radius:99px;font-size:11px;font-weight:500;}
+.hospital-card.disabled .hc-badge{background:var(--gray-bg);color:var(--gray-text);}
+
+/* ── TEAM SELECT ── */
+#page-team{display:none;align-items:center;justify-content:center;flex-direction:column;padding:60px 24px;}
+#page-team.active{display:flex;}
+.team-header{text-align:center;margin-bottom:40px;}
+.team-header h2{font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-bottom:6px;}
+.team-header p{font-size:14px;color:var(--text2);}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:380px;width:100%;}
+.team-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;text-align:center;}
+.team-card:hover{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,160,0.08);}
+.team-card .tc-label{font-size:18px;font-weight:600;letter-spacing:-0.02em;margin-bottom:4px;}
+.team-card .tc-sub{font-size:12px;color:var(--text2);}
+
+/* ── BOARD ── */
+#page-board{display:none;padding:24px;}
+#page-board.active{display:block;}
+.board-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.board-info h2{font-size:18px;font-weight:600;letter-spacing:-0.02em;}
+.board-info p{font-size:13px;color:var(--text2);margin-top:2px;}
+.board-actions{display:flex;align-items:center;gap:10px;}
+.save-ind{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;opacity:0;transition:opacity 0.3s;}
+.save-ind.show{opacity:1;}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:background 0.12s;}
+.btn:hover{background:var(--surface2);}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-primary:hover{background:#1648880;}
+.btn-danger{color:var(--red-text);border-color:var(--red-border);}
+.btn-danger:hover{background:var(--red-bg);}
+
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.empty-state{text-align:center;padding:64px 24px;color:var(--text2);border:1px dashed var(--border2);border-radius:var(--radius);}
+.empty-state p{margin-bottom:16px;font-size:15px;}
+
+/* ── PATIENT CARD ── */
+.patient-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+.card-stripe{height:4px;}
+.stripe-green{background:#4a9c22;}
+.stripe-amber{background:#d4860a;}
+.stripe-red{background:#d43a3a;}
+.stripe-gray{background:#aaa9a0;}
+.card-header{padding:12px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);}
+.card-hl{display:flex;align-items:center;gap:10px;}
+.bed-tag{background:var(--blue-bg);color:var(--blue);border-radius:var(--radius-sm);padding:4px 10px;font-size:13px;font-weight:600;white-space:nowrap;}
+.pt-name{font-size:14px;font-weight:600;color:var(--text);}
+.pt-mrn{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px;}
+.card-hr{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.status-pill{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:500;}
+.sp-stable{background:var(--green-bg);color:var(--green-text);}
+.sp-watch{background:var(--amber-bg);color:var(--amber-text);}
+.sp-critical{background:var(--red-bg);color:var(--red-text);}
+.sp-unknown{background:var(--gray-bg);color:var(--gray-text);}
+.icon-btn{background:transparent;border:none;cursor:pointer;padding:5px;color:var(--text2);border-radius:5px;display:flex;align-items:center;font-size:15px;transition:background 0.1s;}
+.icon-btn:hover{background:var(--surface2);color:var(--text);}
+
+.adm-dx-row{padding:7px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;color:var(--text);display:flex;align-items:center;gap:7px;}
+.adm-dx-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;}
+
+.card-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.fb{display:flex;flex-direction:column;gap:4px;}
+.fl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;}
+.fv{font-size:12px;color:var(--text);line-height:1.55;}
+.pill-row{display:flex;flex-wrap:wrap;gap:3px;}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;border:1px solid;font-family:var(--font);}
+.pill-med{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border);}
+.pill-consult{background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-border);}
+.pill-lab-high{background:var(--red-bg);color:var(--red-text);border-color:var(--red-border);}
+.pill-lab-low{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border);}
+.pill-lab-normal{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border);}
+.pill-lab-pending{background:var(--gray-bg);color:var(--gray-text);border-color:var(--gray-border);}
+
+.plan-box{border-radius:var(--radius-sm);padding:9px 11px;}
+.plan-morning{background:#fff;border:1.5px solid #378ADD;}
+.plan-oncall{background:var(--surface2);border:1px solid var(--border);}
+.plan-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;}
+.plan-morning .plan-lbl{color:var(--blue);}
+.plan-oncall .plan-lbl{color:var(--text3);}
+.plan-txt{font-size:12px;line-height:1.55;color:var(--text);}
+
+/* ── MODAL ── */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;}
+.modal-backdrop.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border2);width:100%;max-width:600px;box-shadow:0 8px 32px rgba(0,0,0,0.15);}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:16px;font-weight:600;}
+.modal-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.mf{display:flex;flex-direction:column;gap:5px;}
+.mf.full{grid-column:1/-1;}
+.mf label{font-size:12px;font-weight:500;color:var(--text2);}
+.mf input,.mf textarea,.mf select{font-family:var(--font);font-size:13px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);width:100%;resize:vertical;}
+.mf input:focus,.mf textarea:focus,.mf select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,86,160,0.12);}
+.mf textarea{min-height:68px;}
+.modal-ft{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border);}
+
+/* ── LAB PICKER ── */
+.lab-picker-wrap{grid-column:1/-1;}
+.lab-picker-lbl{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px;}
+.lab-groups{display:flex;flex-direction:column;gap:12px;}
+.lg-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+.lab-rows{display:flex;flex-direction:column;gap:3px;}
+.lab-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);transition:border-color 0.1s;}
+.lab-row.active{border-color:var(--blue-border);background:var(--blue-bg);}
+.lab-chk{width:14px;height:14px;cursor:pointer;accent-color:var(--blue);flex-shrink:0;}
+.lab-name{font-size:12px;font-weight:500;color:var(--text);min-width:72px;}
+.lab-val{font-family:var(--mono);font-size:12px;padding:3px 7px;width:76px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);}
+.lab-val:focus{outline:none;border-color:var(--blue);}
+.lab-val:disabled{opacity:0.35;}
+.stg{display:flex;gap:3px;margin-left:auto;}
+.stb{padding:2px 9px;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--text2);font-family:var(--font);transition:all 0.1s;}
+.stb:hover{background:var(--surface2);}
+.stb.h.on{background:var(--red-bg);color:var(--red-text);border-color:var(--red-border);}
+.stb.n.on{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border);}
+.stb.l.on{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border);}
+.stb.p.on{background:var(--gray-bg);color:var(--gray-text);border-color:var(--gray-border);}
+
+/* SVG icons (inline) */
+.ico{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Handover<span>Board</span></div>
+  <div class="nav-breadcrumb" id="breadcrumb"></div>
+</nav>
+
+<!-- LANDING PAGE -->
+<div class="page" id="page-landing">
+  <div class="landing-header">
+    <h1>Select your hospital</h1>
+    <p>Choose your hospital to access the handover board</p>
+  </div>
+  <div class="hospital-grid">
+    <div class="hospital-card" onclick="selectHospital('YM')">
+      <div class="hc-name">YM</div>
+      <div class="hc-sub">Yamama Hospital</div>
+      <div class="hc-badge">Active</div>
+    </div>
+    <div class="hospital-card disabled">
+      <div class="hc-name">KFMC</div>
+      <div class="hc-sub">King Fahad Medical City</div>
+      <div class="hc-badge">Coming soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM PAGE -->
+<div class="page" id="page-team">
+  <div class="team-header">
+    <h2 id="team-heading">Select your team</h2>
+    <p id="team-sub">Choose your team to open the board</p>
+  </div>
+  <div class="team-grid">
+    <div class="team-card" onclick="selectTeam('A')">
+      <div class="tc-label">Team A</div>
+      <div class="tc-sub">Morning & on-call board</div>
+    </div>
+    <div class="team-card" onclick="selectTeam('B')">
+      <div class="tc-label">Team B</div>
+      <div class="tc-sub">Morning & on-call board</div>
+    </div>
+  </div>
+</div>
+
+<!-- BOARD PAGE -->
+<div class="page" id="page-board">
+  <div class="board-topbar">
+    <div class="board-info">
+      <h2 id="board-title">Board</h2>
+      <p id="board-sub">—</p>
+    </div>
+    <div class="board-actions">
+      <span class="save-ind" id="save-ind">
+        <svg class="ico"><polyline points="20 6 9 17 4 12"/></svg> Saved
+      </span>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg class="ico"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add patient
+      </button>
+    </div>
+  </div>
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">Add patient</div>
+      <button class="icon-btn" onclick="closeModal()">
+        <svg class="ico"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-ft">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePatient()">
+        <svg class="ico"><polyline points="20 6 9 17 4 12"/></svg>
+        Save patient
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const LAB_GROUPS=[
+  {g:'CBC',labs:['WBC','Hgb','Plt','Neut%','Neut Abs','Lymph%','Lymph Abs']},
+  {g:'Renal',labs:['Na','K','Cl','BUN','Creatinine','Ca','Mg']},
+  {g:'Liver & Coagulation',labs:['ALT','AST','ALP','Bilirubin','Albumin','Lipase','LDH','INR','PT','PTT','Fibrinogen']},
+  {g:'Inflammatory',labs:['CRP','ESR','Procalcitonin']},
+  {g:'Blood Gas',labs:['pH','pO2','pCO2','HCO3(g)','SpO2']}
+];
+
+const STATUS_MAP={
+  stable:{label:'Stable',pill:'sp-stable',stripe:'stripe-green'},
+  watch:{label:'Watch',pill:'sp-watch',stripe:'stripe-amber'},
+  critical:{label:'Critical',pill:'sp-critical',stripe:'stripe-red'},
+};
+
+let currentHospital='', currentTeam='', editingId=null, labState={};
+
+function storeKey(){return `hb_${currentHospital}_${currentTeam}`;}
+
+function loadPatients(){
+  try{return JSON.parse(localStorage.getItem(storeKey()))||[];}catch(e){return [];}
+}
+
+function savePatients(pts){
+  localStorage.setItem(storeKey(),JSON.stringify(pts));
+  const el=document.getElementById('save-ind');
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+// ── NAVIGATION ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  updateBreadcrumb();
+}
+
+function updateBreadcrumb(){
+  const bc=document.getElementById('breadcrumb');
+  if(!currentHospital){bc.innerHTML='';return;}
+  let html=`<button onclick="goHome()">${currentHospital}</button>`;
+  if(currentTeam){
+    html+=`<span class="sep">›</span><button onclick="goTeam()">${currentTeam}</button>`;
+    html+=`<span class="sep">›</span><span>Team ${currentTeam}</span>`;
+  }
+  bc.innerHTML=html;
+}
+
+function goHome(){currentHospital='';currentTeam='';showPage('page-landing');}
+function goTeam(){currentTeam='';showPage('page-team');}
+
+function selectHospital(h){
+  currentHospital=h;
+  document.getElementById('team-heading').textContent=`Select your team — ${h}`;
+  document.getElementById('team-sub').textContent=`${h} handover board`;
+  showPage('page-team');
+}
+
+function selectTeam(t){
+  currentTeam=t;
+  document.getElementById('board-title').textContent=`${currentHospital} · Team ${t}`;
+  document.getElementById('board-sub').textContent=`${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
+  showPage('page-board');
+  renderBoard();
+}
+
+// ── RENDER ──
+function labSymbol(s){return s==='high'?'↑':s==='low'?'↓':s==='pending'?'?':'';}
+function labCls(s){return s==='high'?'pill-lab-high':s==='low'?'pill-lab-low':s==='pending'?'pill-lab-pending':'pill-lab-normal';}
+
+function pillsHtml(str,cls){
+  return str?str.split(',').map(s=>s.trim()).filter(Boolean).map(s=>`<span class="pill ${cls}">${s}</span>`).join(''):'';
+}
+
+function renderCard(p){
+  const sm=STATUS_MAP[p.status]||{label:'—',pill:'sp-unknown',stripe:'stripe-gray'};
+  const labPills=(p.labData||[]).map(l=>`<span class="pill ${labCls(l.status)}">${l.name}${l.value?' '+l.value:''}${labSymbol(l.status)}</span>`).join('');
+  return `<div class="patient-card">
+    <div class="card-stripe ${sm.stripe}"></div>
+    <div class="card-header">
+      <div class="card-hl">
+        <div class="bed-tag">${esc(p.bed)}</div>
+        <div>
+          <div class="pt-name">${esc(p.name)}</div>
+          <div class="pt-mrn">${esc(p.mrn)}</div>
+        </div>
+      </div>
+      <div class="card-hr">
+        <span class="status-pill ${sm.pill}">${sm.label}</span>
+        <button class="icon-btn" onclick="openModal(${p.id})" title="Edit">
+          <svg class="ico"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn btn-danger" onclick="deletePatient(${p.id})" title="Delete">
+          <svg class="ico"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>
+    ${p.admdx?`<div class="adm-dx-row"><span class="adm-dx-label">Adm. Dx</span><span>${esc(p.admdx)}</span></div>`:''}
+    <div class="card-body">
+      ${p.background?`<div class="fb"><div class="fl">Background</div><div class="fv">${esc(p.background)}</div></div>`:''}
+      ${p.meds?`<div class="fb"><div class="fl">Medications</div><div class="pill-row">${pillsHtml(p.meds,'pill-med')}</div></div>`:''}
+      ${labPills?`<div class="fb"><div class="fl">Labs</div><div class="pill-row">${labPills}</div></div>`:''}
+      ${p.consults?`<div class="fb"><div class="fl">Consultations</div><div class="pill-row">${pillsHtml(p.consults,'pill-consult')}</div></div>`:''}
+      ${p.plan?`<div class="plan-box plan-morning"><div class="plan-lbl">☀ Morning plan</div><div class="plan-txt">${esc(p.plan)}</div></div>`:''}
+      ${p.oncall?`<div class="plan-box plan-oncall"><div class="plan-lbl">☾ On-call plan</div><div class="plan-txt">${esc(p.oncall)}</div></div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderBoard(){
+  const pts=loadPatients();
+  const grid=document.getElementById('cards-grid');
+  if(!pts.length){
+    grid.innerHTML=`<div class="empty-state"><p>No patients yet for this team</p><button class="btn btn-primary" onclick="openModal()">Add first patient</button></div>`;
+  } else {
+    grid.innerHTML=pts.map(renderCard).join('');
+  }
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── MODAL ──
+function buildLabPicker(existing){
+  labState={};
+  (existing||[]).forEach(l=>{labState[l.name]={on:true,val:l.value||'',st:l.status||'normal'};});
+  return `<div class="lab-picker-wrap">
+    <div class="lab-picker-lbl">Labs — tick to include, enter value, set status</div>
+    <div class="lab-groups">${LAB_GROUPS.map(g=>`
+      <div><div class="lg-title">${g.g}</div>
+      <div class="lab-rows">${g.labs.map(name=>{
+        const s=labState[name]||{on:false,val:'',st:'normal'};
+        return `<div class="lab-row${s.on?' active':''}" id="lr-${name}">
+          <input type="checkbox" class="lab-chk" id="lc-${name}" ${s.on?'checked':''} onchange="toggleLab('${name}')">
+          <span class="lab-name">${name}</span>
+          <input type="text" class="lab-val" id="lv-${name}" value="${s.val}" placeholder="value" ${s.on?'':'disabled'} oninput="updLabVal('${name}',this.value)">
+          <div class="stg">
+            <button class="stb h${s.on&&s.st==='high'?' on':''}" onclick="setLab('${name}','high')">H</button>
+            <button class="stb n${s.on&&s.st==='normal'?' on':''}" onclick="setLab('${name}','normal')">N</button>
+            <button class="stb l${s.on&&s.st==='low'?' on':''}" onclick="setLab('${name}','low')">L</button>
+            <button class="stb p${s.on&&s.st==='pending'?' on':''}" onclick="setLab('${name}','?')">?</button>
+          </div>
+        </div>`;
+      }).join('')}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function toggleLab(name){
+  const chk=document.getElementById('lc-'+name);
+  const row=document.getElementById('lr-'+name);
+  const val=document.getElementById('lv-'+name);
+  if(!labState[name])labState[name]={on:false,val:'',st:'normal'};
+  labState[name].on=chk.checked;
+  row.classList.toggle('active',chk.checked);
+  val.disabled=!chk.checked;
+  refreshStBtns(name);
+}
+
+function updLabVal(name,v){if(labState[name])labState[name].val=v;}
+
+function setLab(name,st){
+  if(!labState[name])labState[name]={on:false,val:'',st:'normal'};
+  labState[name].st=st==='?'?'pending':st;
+  const chk=document.getElementById('lc-'+name);
+  if(!chk.checked){chk.checked=true;toggleLab(name);}
+  refreshStBtns(name);
+}
+
+function refreshStBtns(name){
+  const s=labState[name]||{on:false,st:'normal'};
+  const row=document.getElementById('lr-'+name);
+  if(!row)return;
+  row.querySelectorAll('.stb').forEach(b=>{
+    const map={h:'high',n:'normal',l:'low',p:'pending'};
+    const key=[...b.classList].find(c=>map[c]);
+    b.classList.toggle('on',s.on&&map[key]===s.st);
+  });
+}
+
+function getLabData(){
+  return Object.entries(labState).filter(([,v])=>v.on).map(([name,v])=>({name,value:v.val,status:v.st}));
+}
+
+function openModal(id){
+  editingId=id||null;
+  const pts=loadPatients();
+  const p=id?pts.find(x=>x.id===id):null;
+  document.getElementById('modal-title').textContent=id?'Edit patient':'Add patient';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="mf"><label>Bed</label><input id="f-bed" value="${p?esc(p.bed):''}" placeholder="e.g. 12A"/></div>
+    <div class="mf"><label>MRN</label><input id="f-mrn" value="${p?esc(p.mrn):''}" placeholder="e.g. 00123456"/></div>
+    <div class="mf full"><label>Patient name</label><input id="f-name" value="${p?esc(p.name):''}" placeholder="Last, First"/></div>
+    <div class="mf full"><label>Admission diagnosis</label><input id="f-admdx" value="${p?esc(p.admdx||''):''}" placeholder="e.g. NSTEMI, Urosepsis"/></div>
+    <div class="mf full"><label>Status</label>
+      <select id="f-status">
+        <option value="stable" ${(!p||p.status==='stable')?'selected':''}>Stable</option>
+        <option value="watch" ${p&&p.status==='watch'?'selected':''}>Watch</option>
+        <option value="critical" ${p&&p.status==='critical'?'selected':''}>Critical</option>
+      </select>
+    </div>
+    <div class="mf full"><label>Background</label><textarea id="f-bg">${p?esc(p.background||''):''}</textarea></div>
+    <div class="mf full"><label>Medications (comma-separated)</label><input id="f-meds" value="${p?esc(p.meds||''):''}" placeholder="e.g. Metformin 500mg, Lisinopril 10mg"/></div>
+    ${buildLabPicker(p?p.labData:[])}
+    <div class="mf full"><label>Consultations (comma-separated)</label><input id="f-consults" value="${p?esc(p.consults||''):''}" placeholder="e.g. Cardiology, Nephrology"/></div>
+    <div class="mf full"><label>Morning plan</label><textarea id="f-plan">${p?esc(p.plan||''):''}</textarea></div>
+    <div class="mf full"><label>On-call plan</label><textarea id="f-oncall">${p?esc(p.oncall||''):''}</textarea></div>
+  `;
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modal-backdrop').classList.remove('open');
+  editingId=null;labState={};
+}
+
+function savePatient(){
+  const v=id=>document.getElementById(id)?.value.trim()||'';
+  if(!v('f-name')||!v('f-bed')){alert('Name and bed are required.');return;}
+  const pts=loadPatients();
+  const data={bed:v('f-bed'),mrn:v('f-mrn'),name:v('f-name'),admdx:v('f-admdx'),status:v('f-status'),background:v('f-bg'),meds:v('f-meds'),labData:getLabData(),consults:v('f-consults'),plan:v('f-plan'),oncall:v('f-oncall')};
+  if(editingId){
+    const i=pts.findIndex(p=>p.id===editingId);
+    if(i>-1)pts[i]={...pts[i],...data};
+  } else {
+    pts.push({id:Date.now(),...data});
+  }
+  savePatients(pts);
+  closeModal();
+  renderBoard();
+}
+
+function deletePatient(id){
+  if(!confirm('Remove this patient from the board?'))return;
+  const pts=loadPatients().filter(p=>p.id!==id);
+  savePatients(pts);
+  renderBoard();
+}
+
+document.getElementById('modal-backdrop').addEventListener('click',function(e){
+  if(e.target===this)closeModal();
+});
+
+showPage('page-landing');
+</script>
+</body>
+</html>

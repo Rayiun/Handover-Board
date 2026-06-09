@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Handover Board</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<title>Next Shift</title>
+<style>
+@font-face{font-family:'Thmanyah';src:url('thmanyahsans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Thmanyah';src:url('thmanyahsans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'Thmanyah';src:url('thmanyahsans-Bold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -18,10 +22,24 @@
   --purple-bg:#eeedf8;--purple-text:#3c3280;--purple-border:#c8c4f0;
   --gray-bg:#f0ede8;--gray-text:#555550;--gray-border:#ccc9c0;
   --radius:10px;--radius-sm:6px;
-  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --font:'Thmanyah',sans-serif;--mono:'Thmanyah',monospace;
   --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.05);
 }
-*{box-sizing:border-box;margin:0;padding:0;}
+[data-theme="dark"]{
+  --bg:#141414;--surface:#1e1e1e;--surface2:#272727;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#f0efeb;--text2:#9b9b93;--text3:#5a5a54;
+  --blue:#4a8fd4;--blue-bg:rgba(74,143,212,0.15);--blue-border:rgba(74,143,212,0.35);
+  --green-bg:rgba(74,156,34,0.15);--green-text:#7ec850;--green-border:rgba(74,156,34,0.35);
+  --amber-bg:rgba(212,134,10,0.15);--amber-text:#f0a830;--amber-border:rgba(212,134,10,0.35);
+  --red-bg:rgba(212,58,58,0.15);--red-text:#f07070;--red-border:rgba(212,58,58,0.35);
+  --purple-bg:rgba(140,120,220,0.15);--purple-text:#b0a0f0;--purple-border:rgba(140,120,220,0.35);
+  --gray-bg:rgba(255,255,255,0.06);--gray-text:#7a7a72;--gray-border:rgba(255,255,255,0.12);
+  --shadow:0 1px 3px rgba(0,0,0,0.3),0 1px 2px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .plan-morning{background:#1a2535;border-color:#2a5a9a;}
+[data-theme="dark"] .plan-morning .plan-lbl{color:#4a8fd4;}
+*{box-sizing:border-box;margin:0;padding:0;transition:background-color .2s,border-color .2s;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;}
 .nav-logo{font-size:15px;font-weight:600;letter-spacing:-0.02em;}
@@ -152,8 +170,13 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24
 </head>
 <body>
 <nav>
-  <div class="nav-logo">Handover<span>Board</span></div>
-  <div class="nav-bc" id="nav-bc"></div>
+  <div class="nav-logo">Next<span>Shift</span></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button id="theme-btn" onclick="toggleTheme()" style="background:transparent;border:1px solid var(--border2);border-radius:99px;padding:5px 12px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:5px;">
+      <span id="theme-icon">🌙</span><span id="theme-label">Dark</span>
+    </button>
+    <div class="nav-bc" id="nav-bc"></div>
+  </div>
 </nav>
 <div class="page" id="page-landing">
   <div class="landing-hd">
@@ -450,6 +473,25 @@ async function deletePatient(id){
   await deletePatientDB(id);
 }
 document.getElementById('modal-backdrop').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.getAttribute('data-theme')==='dark';
+  const newTheme=isDark?'light':'dark';
+  html.setAttribute('data-theme',newTheme);
+  localStorage.setItem('hb_theme',newTheme);
+  document.getElementById('theme-icon').textContent=isDark?'🌙':'☀️';
+  document.getElementById('theme-label').textContent=isDark?'Dark':'Light';
+}
+(function(){
+  const saved=localStorage.getItem('hb_theme');
+  const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme=saved||(prefersDark?'dark':'light');
+  if(theme==='dark'){
+    document.documentElement.setAttribute('data-theme','dark');
+    document.getElementById('theme-icon').textContent='☀️';
+    document.getElementById('theme-label').textContent='Light';
+  }
+})();
 </script>
 </body>
 </html>
